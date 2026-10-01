@@ -1,0 +1,24 @@
+# Configuração mínima do Supabase CLI (valores omitidos usam os padrões).
+# Gere a versão completa com `npx supabase init` se precisar customizar mais.
+project_id = "fast-chickn"
+
+[api]
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+port = 54323
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# Em desenvolvimento local os e-mails ficam disponíveis no Inbucket (porta 54324).
+enable_confirmations = false
