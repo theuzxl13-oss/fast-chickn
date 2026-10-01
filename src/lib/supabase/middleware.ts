@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
+import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseEnvProblems } from "@/lib/env";
 import type { UserRole } from "@/types";
 
 const CLIENT_ROUTES = ["/checkout", "/pedido", "/pedidos", "/favoritos", "/conta"];
@@ -18,7 +18,7 @@ function matches(pathname: string, prefix: string) {
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return response;
+  if (supabaseEnvProblems().length) return response;
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
