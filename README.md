@@ -269,6 +269,25 @@ npm start
 
 ---
 
+## Publicar no Render
+
+O repositório inclui um [`render.yaml`](render.yaml) (Blueprint).
+
+1. Em <https://dashboard.render.com>, entre com o GitHub e clique em **New → Blueprint**.
+2. Selecione o repositório `fast-chickn` e confirme.
+3. Preencha as variáveis pedidas:
+   - `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Supabase → Project Settings → API)
+   - `NEXT_PUBLIC_SITE_URL` = a URL do serviço (ex.: `https://fast-chickn.onrender.com`)
+4. Clique em **Apply** e aguarde o build (alguns minutos).
+5. No Supabase (**Authentication → URL Configuration**), adicione a URL do Render em *Site URL* e `https://fast-chickn.onrender.com/auth/callback` em *Redirect URLs*.
+
+> **Não** cadastre `SUPABASE_SERVICE_ROLE_KEY` no Render — o site não usa essa chave.
+> No plano gratuito, o serviço “dorme” após 15 minutos sem acesso; a primeira visita seguinte leva cerca de 50 segundos.
+
+> As variáveis `NEXT_PUBLIC_*` entram no build. Se alterá-las depois, faça **Manual Deploy → Clear build cache & deploy**.
+
+---
+
 ## Integrações futuras
 
 Tudo abaixo já tem a arquitetura pronta e está claramente identificado no código:

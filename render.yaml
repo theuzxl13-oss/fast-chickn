@@ -1,0 +1,31 @@
+# Render Blueprint — FAST CHICKN
+# No Render: New → Blueprint → selecione este repositório.
+# As variáveis marcadas com sync: false são pedidas na criação (não ficam no Git).
+services:
+  - type: web
+    name: fast-chickn
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /manifest.webmanifest
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_DEFAULT_LAT
+        value: "-23.5505"
+      - key: NEXT_PUBLIC_DEFAULT_LNG
+        value: "-46.6333"
+      - key: PAYMENT_PROVIDER
+        value: demo
