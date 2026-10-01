@@ -351,10 +351,29 @@ const CLIENTS = [
 // ---------------------------------------------------------------------------
 // Execução
 // ---------------------------------------------------------------------------
+/** Remove os dados de demonstração (mantém as contas de login, que são reaproveitadas). */
+async function resetDemoData() {
+  console.log("→ Limpando dados de demonstração anteriores");
+  const all = (table: string, col = "id") => db.from(table).delete().not(col, "is", null);
+  for (const table of ["orders", "coupons", "banners", "carts", "favorites", "notifications"]) {
+    const { error } = await all(table, table === "favorites" ? "user_id" : "id");
+    if (error) throw new Error(`limpar ${table}: ${error.message}`);
+  }
+  for (const table of ["restaurants", "categories"]) {
+    const { error } = await all(table);
+    if (error) throw new Error(`limpar ${table}: ${error.message}`);
+  }
+  const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const demoIds = (list?.users ?? []).filter((u) => u.email?.endsWith("@fastchickn.dev")).map((u) => u.id);
+  if (demoIds.length) await db.from("addresses").delete().in("user_id", demoIds);
+}
+
 async function main() {
+  if (process.argv.includes("--reset")) await resetDemoData();
+
   const { count } = await db.from("restaurants").select("*", { count: "exact", head: true });
   if ((count ?? 0) > 0) {
-    console.log("ℹ O banco já possui restaurantes — seed ignorado. Para recriar: supabase db reset (local) ou limpe as tabelas.");
+    console.log("ℹ O banco já possui restaurantes — seed ignorado. Para recriar os dados de demonstração: npm run db:seed -- --reset");
     return;
   }
 
@@ -445,7 +464,18 @@ async function main() {
       { code: "PIZZA20", description: "20% OFF em pizzarias participantes", discount_type: "percent", discount_value: 20, max_discount: 25, min_order_value: 50, usage_per_user: 2, created_by: adminId },
       { code: "CHICKEN5", description: "R$ 5 OFF na Chicken House", discount_type: "fixed", discount_value: 5, min_order_value: 25, usage_per_user: 5, owner_restaurant_id: chickenId },
       { code: "VERAO2026", description: "Cupom expirado (exemplo)", discount_type: "percent", discount_value: 15, min_order_value: 0, starts_at: daysAgo(90), ends_at: daysAgo(30), created_by: adminId },
-    ]).select("id, code"),
+    ].map((c) => ({
+      // Inserção em lote: o PostgREST grava NULL nas colunas ausentes de qualquer
+      // linha, então todas as linhas precisam ter as mesmas chaves.
+      starts_at: daysAgo(30),
+      ends_at: null,
+      max_discount: null,
+      usage_limit: null,
+      usage_per_user: 1,
+      owner_restaurant_id: null,
+      created_by: null,
+      ...c,
+    }))).select("id, code"),
     "cupons",
   );
   const pizzaCoupon = coupons.find((c) => c.code === "PIZZA20")!;

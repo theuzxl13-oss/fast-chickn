@@ -44,7 +44,17 @@ export function CheckoutForm({
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const [placedCode, setPlacedCode] = useState<string | null>(null);
 
+  if (placedCode) {
+    return (
+      <EmptyState
+        emoji="✅"
+        title={`Pedido #${placedCode} realizado!`}
+        description="Abrindo o acompanhamento do seu pedido…"
+      />
+    );
+  }
   if (!cart.ready) return <Skeleton className="h-96" />;
   if (!cart.restaurant || cart.lines.length === 0) {
     return (
@@ -88,6 +98,7 @@ export function CheckoutForm({
         setError(res.error);
         return;
       }
+      setPlacedCode(res.data!.code);
       cart.clear();
       toast(`Pedido #${res.data!.code} realizado!`);
       router.push(`/pedido/${res.data!.id}?novo=1`);

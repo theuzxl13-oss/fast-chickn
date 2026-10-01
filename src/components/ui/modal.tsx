@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -35,9 +36,11 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  // Portal no <body>: evita que ancestrais com transform/animação "prendam" o
+  // position:fixed e deixem o cabeçalho por cima do modal.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6" role="presentation">
       <div className="absolute inset-0 bg-ink-900/50 backdrop-blur-[2px] animate-fade-up" onClick={onClose} aria-hidden />
       <div
@@ -68,6 +71,7 @@ export function Modal({
         <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
         {footer && <div className="border-t border-ink-100 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
